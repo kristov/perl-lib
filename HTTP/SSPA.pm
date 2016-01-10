@@ -41,6 +41,13 @@ has tool => (
     builder => '_build_tool',
 );
 
+has theme => (
+    is  => 'rw',
+    isa => 'Str',
+    required => 0,
+    default => 'Cyborg',
+);
+
 sub _build_tool {
     my ( $self ) = @_;
     return HTTP::Tool->new( { directory_root => $self->app_root } );
@@ -161,6 +168,11 @@ sub render {
     return $self->tool->render_template( $template, $data );
 }
 
+sub set_theme {
+    my ( $self, $theme ) = @_;
+    $self->theme( $theme );
+}
+
 sub add_lib {
     my ( $self, @libs ) = @_;
 }
@@ -177,7 +189,8 @@ sub libs {
     push @js, "/static/libs/$_" for @{ $libs->{jquery}->{'2.1.4'}->{js} };
     push @js, "/static/libs/$_" for @{ $libs->{bootstrap}->{'3.3.5'}->{js} };
     #push @css, "/static/libs/$_" for @{ $libs->{bootstrap}->{'3.3.5'}->{css} };
-    push @css, "/static/libs/BootstrapThemes/Cyborg/bootstrap.css";
+    my $theme = $self->theme;
+    push @css, "/static/libs/BootstrapThemes/$theme/bootstrap.css";
 
     return {
         js  => \@js,
