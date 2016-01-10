@@ -25,9 +25,4 @@ sub thumb_url {
     return "https://192.168.2.2/static/images/$file" . '_thumbnail.' . $ext;
 }
 
-sub tag_link {
-    my ( $self, $tag ) = @_;
-    return "https://192.168.2.2/static/site/tags/$tag.html";
-}
-
 1;
