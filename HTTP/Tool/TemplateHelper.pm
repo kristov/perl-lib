@@ -25,4 +25,15 @@ sub thumb_url {
     return "https://192.168.2.2/static/images/$file" . '_thumbnail.' . $ext;
 }
 
+sub add_sub {
+    my ( $self, $app, $name, $sub ) = @_;
+    my $fqs = __PACKAGE__ . "::$name";
+    {
+        no strict 'refs';
+        *{ $fqs } = sub {
+            $sub->( $app );
+        };
+    }
+}
+
 1;

@@ -182,6 +182,11 @@ sub render {
     return $self->tool->render_template( $template, $data );
 }
 
+sub add_helper {
+    my ( $self, $name, $sub ) = @_;
+    $self->tool->template_helper->add_sub( $self, $name, $sub );
+}
+
 sub set_theme {
     my ( $self, $theme ) = @_;
     $self->theme( $theme );
