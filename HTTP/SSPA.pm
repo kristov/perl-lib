@@ -6,15 +6,22 @@ use Plack::Response;
 use JSON;
 use Template;
 use HTTP::Tool;
+use Moose::Util::TypeConstraints;
+
+subtype 'SiteObject'
+    => as 'Object'
+    => where { $_->can( 'dispatch' ) }
+    => message { 'The site object needs a dispatch() method: see the manual' };
 
 has req => (
     is  => 'rw',
     isa => 'Plack::Request',
 );
 
-has dispatch => (
+has site => (
     is  => 'rw',
-    isa => 'Object',
+    isa => 'SiteObject',
+    required => 1,
 );
 
 has params => (
@@ -79,7 +86,7 @@ sub process {
     my $params = $req->parameters->mixed;
     $self->params( $params );
 
-    my %DISPATCH = $self->dispatch->dispatch;
+    my %DISPATCH = $self->site->dispatch;
 
     if ( $DISPATCH{BEFORE} ) {
         $DISPATCH{BEFORE}->( $self );
