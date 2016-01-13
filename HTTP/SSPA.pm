@@ -60,6 +60,13 @@ has theme => (
     default => 'Cyborg',
 );
 
+sub BUILD {
+    my ( $self ) = @_;
+    if ( $self->site->can( 'APP_INIT' ) ) {
+        $self->site->APP_INIT( $self );
+    }
+}
+
 my $HANDLER_STATIC = sub {
     my ( $self ) = @_;
     my $file = $self->req->path;
