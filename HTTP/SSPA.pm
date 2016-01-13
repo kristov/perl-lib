@@ -48,17 +48,17 @@ has tool => (
     builder => '_build_tool',
 );
 
+sub _build_tool {
+    my ( $self ) = @_;
+    return HTTP::Tool->new( { directory_root => $self->app_root } );
+}
+
 has theme => (
     is  => 'rw',
     isa => 'Str',
     required => 0,
     default => 'Cyborg',
 );
-
-sub _build_tool {
-    my ( $self ) = @_;
-    return HTTP::Tool->new( { directory_root => $self->app_root } );
-}
 
 my $HANDLER_STATIC = sub {
     my ( $self ) = @_;
