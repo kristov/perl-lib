@@ -5,7 +5,6 @@ use Plack::Request;
 use Plack::Response;
 use JSON;
 use Template;
-use HTTP::Tool;
 use Moose::Util::TypeConstraints;
 
 subtype 'SiteObject'
@@ -41,23 +40,54 @@ has app_root => (
     required => 1,
 );
 
-has tool => (
-    is => 'ro',
-    isa => 'HTTP::Tool',
-    lazy => 1,
-    builder => '_build_tool',
-);
-
-sub _build_tool {
-    my ( $self ) = @_;
-    return HTTP::Tool->new( { directory_root => $self->app_root } );
-}
-
 has theme => (
     is  => 'rw',
     isa => 'Str',
     required => 0,
     default => 'Cyborg',
+);
+
+has 'static_manifest' => (
+    is      => 'rw',
+    isa     => 'HashRef',
+    lazy    => 1,
+    builder => '_build_static_manifest',
+    documentation => 'Hashref of static libraries and their versions',
+);
+
+sub _build_static_manifest {
+    my ( $self ) = @_;
+    return $self->load_json( $self->static_manifest_file );
+}
+
+has 'static_manifest_file' => (
+    is => 'rw',
+    isa => 'Str',
+    default => '/opt/www/static/static_manifest.json',
+);
+
+has 'tt' => (
+    is => 'ro',
+    isa => 'Template',
+    lazy => 1,
+    builder => '_build_tt',
+);
+
+sub _build_tt {
+    my ( $self ) = @_;
+    return Template->new( {
+        INCLUDE_PATH => $self->app_root . "/views",
+        START_TAG    => '<%',
+        END_TAG      => '%>',
+    } );
+}
+
+has 'json' => (
+    is      => 'ro',
+    isa     => 'JSON',
+    default => sub {
+        return JSON->new();
+    },
 );
 
 sub BUILD {
@@ -72,7 +102,7 @@ my $HANDLER_STATIC = sub {
     my $file = $self->req->path;
     my $app_root = $self->app_root;
     if ( -e "$app_root/public$file" ) {
-        return $self->tool->slurp( "$app_root/public/$file" );
+        return $self->slurp( "$app_root/public/$file" );
     }
     return;
 };
@@ -137,7 +167,7 @@ sub process {
     my $response = $handler->( $self );
 
     if ( $self->template ) {
-        $response = $self->_template( $self );
+        $response = $self->render( $self->template, $response );
         $self->template( undef );
     }
     elsif ( $response && ref $response ) {
@@ -156,35 +186,20 @@ sub process {
     $res->finalize;
 }
 
-sub _template {
-    my ( $self ) = @_;
-
-    my $layout = 'main';
-    my $template_path = $self->app_root . '/views';
-
-    my $vars = $self->params;
-    my $template = $self->template;
-
-    $template = "$template.tt" if $template !~ /\.tt$/;
-
-    my $output = $self->tool->render_template( "$template_path/$template", $vars );
-
-    if ( -e "$template_path/layouts/$layout.tt" ) {
-        my $wrapper = "";
-        $output = $self->tool->render_template( "layouts/$layout.tt", { %{ $vars }, content => $output } );
-    }
-
-    return $output;
-}
-
 sub render {
     my ( $self, $template, $data ) = @_;
-    return $self->tool->render_template( $template, $data );
-}
 
-sub add_helper {
-    my ( $self, $name, $sub ) = @_;
-    $self->tool->template_helper->add_sub( $self, $name, $sub );
+    my $output = "";
+
+    if ( $self->site->can( 'template_helper' ) ) {
+        my $site_helper = $self->site->template_helper;
+        $data->{TH} = $site_helper if $site_helper;
+    }
+
+    $self->tt->process( $template, $data, \$output )
+        || die $self->tt->error . "\n";
+
+    return $output;
 }
 
 sub set_theme {
@@ -199,7 +214,7 @@ sub add_lib {
 sub libs {
     my ( $self ) = @_;
 
-    my $manifest = $self->tool->static->static_manifest;
+    my $manifest = $self->static_manifest;
     my $libs = $manifest->{libs};
 
     my @js;
@@ -215,6 +230,21 @@ sub libs {
         js  => \@js,
         css => \@css,
     };
+}
+
+sub load_json {
+    my ( $self, $file ) = @_;
+    return $self->json->decode( $self->slurp( $file ) );
+}
+
+sub slurp {
+    my ( $self, $file ) = @_;
+    my $text = "";
+    open( my $fh, '<', $file ) || die "$file: $!";
+    while ( <$fh> ) {
+        $text .= $_;
+    }
+    return $text;
 }
 
 1;
