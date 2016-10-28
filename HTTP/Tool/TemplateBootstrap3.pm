@@ -74,6 +74,17 @@ my %TYPES = (
     'td-danger'         => [ 'td', 'danger' ],
     'td-info'           => [ 'td', 'info' ],
 
+    'panel-default'     => [ 'div', 'panel panel-default' ],
+    'panel-primary'     => [ 'div', 'panel panel-primary' ],
+    'panel-primary'     => [ 'div', 'panel panel-success' ],
+    'panel-info'        => [ 'div', 'panel panel-info' ],
+    'panel-warning'     => [ 'div', 'panel panel-warning' ],
+    'panel-danger'      => [ 'div', 'panel panel-danger' ],
+    'panel-heading'     => [ 'div', 'panel-heading' ],
+    'panel-title'       => [ 'h3', 'panel-title' ],
+    'panel-body'        => [ 'div', 'panel-body' ],
+    'panel-footer'      => [ 'div', 'panel-footer' ],
+
     'form-group'        => [ 'div', 'form-group' ],
     'input-group'       => [ 'div', 'input-group' ],
     'form-inline'       => [ 'form', 'form-inline' ],
