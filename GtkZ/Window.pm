@@ -31,6 +31,11 @@ has 'menu' => (
     builder => '_build_menu',
 );
 
+sub _build_menu {
+    my ( $self ) = @_;
+    return GtkZ::Menu->new( { app => $self->app } );
+}
+
 has 'window' => (
     is => 'rw',
     isa => 'Gtk2::Window',
@@ -38,26 +43,36 @@ has 'window' => (
     builder => '_build_window',
 );
 
-sub _build_menu {
-    my ( $self ) = @_;
-    return GtkZ::Menu->new( { app => $self->app } );
-}
-
 sub _build_window {
     my ( $self ) = @_;
-
-    my $vbox = Gtk2::VBox->new( FALSE, 0 );
 
     my $window = Gtk2::Window->new( 'toplevel' );
     $window->set_default_size( $self->width, $self->height );
 
     my $menu = $self->menu;
-    $vbox->pack_start( $menu->widget, FALSE, FALSE, 0 );
+    $self->main_vbox->pack_start( $menu->widget, FALSE, FALSE, 0 );
 
     $window->signal_connect( delete_event => sub { exit; } );
-    $window->add( $vbox );
+    $window->add( $self->main_vbox );
 
     return $window;
+}
+
+has 'main_vbox' => (
+    is => 'rw',
+    isa => 'Gtk2::VBox',
+    lazy => 1,
+    builder => '_build_main_vbox',
+);
+
+sub _build_main_vbox {
+    my ( $self ) = @_;
+    return Gtk2::VBox->new( FALSE, 0 );
+}
+
+sub add_main_area {
+    my ( $self, $widget ) = @_;
+    $self->main_vbox->pack_end( $widget, TRUE, TRUE, 0 );
 }
 
 sub run {
