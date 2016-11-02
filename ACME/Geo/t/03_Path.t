@@ -13,6 +13,7 @@ use_ok( 'ACME::Geo::Path' );
 
 test_square_4_x_4();
 test_triangle();
+unclosed_poly();
 
 done_testing();
 
@@ -37,9 +38,6 @@ sub test_square_4_x_4 {
 
     my $p1 = ACME::Geo::Path->new( $l1, $l2, $l3, $l4 );
     is( $p1->closed, 1, 'closed(): it is closed' );
-
-    my $p2 = ACME::Geo::Path->new( $l3, $l2, $l1, $l4 );
-    is( $p2->closed, 1, 'closed(): unsorted is closed' );
 
     diag( 'parallel_path(): testing parallel inner square' );
     my $p3 = $p1->parallel_path( 1 );
@@ -96,3 +94,21 @@ sub test_triangle {
     diag( 'parallel_path(): done testing parallel outer triangle' );
 }
 
+sub unclosed_poly {
+    diag( 'testing unclosed_poly' );
+
+    my $l1p1 = ACME::Geo::Point->new( 0, 0 );
+    my $l1p2 = ACME::Geo::Point->new( 4, 0 );
+    my $l1 = ACME::Geo::Line->new( $l1p1, $l1p2 );
+
+    my $l2p1 = ACME::Geo::Point->new( 4, 0 );
+    my $l2p2 = ACME::Geo::Point->new( 4, 4 );
+    my $l2 = ACME::Geo::Line->new( $l2p1, $l2p2 );
+
+    my $l3p1 = ACME::Geo::Point->new( 4, 4 );
+    my $l3p2 = ACME::Geo::Point->new( 0, 4 );
+    my $l3 = ACME::Geo::Line->new( $l3p1, $l3p2 );
+
+    my $p1 = ACME::Geo::Path->new( $l1, $l2, $l3 );
+    is( $p1->closed, 0, 'closed(): it is NOT closed' );
+}

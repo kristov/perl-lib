@@ -15,6 +15,7 @@ at_the_tip();
 vertical_triangle_base();
 flat_triangle();
 vertical_weird_triangle();
+bounding_cube();
 
 done_testing();
 
@@ -139,4 +140,19 @@ sub constructors {
 
     is( $g1->equal( $g2 ), 1, 'g1 equal g2' );
     is( $g2->equal( $g3 ), 1, 'g2 equal g3' );
+}
+
+sub bounding_cube {
+    my $g1 = ACME::Geo::3D::3Gon->new_from_points_raw_refs(
+        [ 2, 2, 1 ],
+        [ 1, 3, 0 ],
+        [ 1, 1, 0 ],
+    );
+    my $bc = $g1->bounding_cube;
+    is( $bc->[0], 1, 'minx good' );
+    is( $bc->[1], 2, 'maxx good' );
+    is( $bc->[2], 1, 'miny good' );
+    is( $bc->[3], 3, 'maxy good' );
+    is( $bc->[4], 0, 'minz good' );
+    is( $bc->[5], 1, 'maxz good' );
 }

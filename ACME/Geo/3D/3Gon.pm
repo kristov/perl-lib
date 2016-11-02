@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use ACME::Geo::3D::Line;
 use ACME::Geo::3D::Point;
+use ACME::Geo::3D::BoundingCube;
 use ACME::Geo::Point;
 use ACME::Geo::Line;
 
@@ -11,6 +12,12 @@ use constant LINEA  => 0;
 use constant LINEB  => 1;
 use constant LINEC  => 2;
 use constant NORMAL => 3;
+use constant BCUBE  => 4;
+
+sub line_a { return $_[0]->[LINEA] }
+sub line_b { return $_[0]->[LINEB] }
+sub line_c { return $_[0]->[LINEC] }
+sub normal { return $_[0]->[NORMAL] }
 
 sub new {
     my ( $class, $linea, $lineb, $linec ) = @_;
@@ -38,7 +45,7 @@ sub new_from_points_raw_refs {
 sub new_from_points_raw_refs_with_normal {
     my ( $class, $normal, $ca, $cb, $cc ) = @_;
     my $self = $class->new_from_points_raw_refs( $ca, $cb, $cc );
-    $self->[NORMAL] = $normal;
+    $self->[NORMAL] = ACME::Geo::3D::Point->new( @{ $normal } );
     return $self;
 }
 
@@ -67,7 +74,11 @@ sub line_zplane_intersection {
         my $p1 = $points_on_z_plane->[1];
         my $p0f = ACME::Geo::Point->new( $p0->X, $p0->Y );
         my $p1f = ACME::Geo::Point->new( $p1->X, $p1->Y );
-        return ACME::Geo::Line->new( $p0f, $p1f );
+        my $normal;
+        if ( $self->[NORMAL] ) {
+            $normal = ACME::Geo::Point->new( $self->[NORMAL]->X, $self->[NORMAL]->Y );
+        }
+        return ACME::Geo::Line->new( $p0f, $p1f, $normal );
     }
 
     my $applicable_lines = [];
@@ -89,7 +100,11 @@ sub line_zplane_intersection {
 
     if ( scalar( @{ $points } ) == 2 ) {
         # line connecting the two intersects
-        return ACME::Geo::Line->new( @{ $points } );
+        my $normal;
+        if ( $self->[NORMAL] ) {
+            $normal = ACME::Geo::Point->new( $self->[NORMAL]->X, $self->[NORMAL]->Y );
+        }
+        return ACME::Geo::Line->new( $points->[0], $points->[1], $normal );
     }
 
     die "not possible";
@@ -102,6 +117,14 @@ sub equal {
         $self->[LINEB]->equal( $g->[LINEB] ) &&
         $self->[LINEC]->equal( $g->[LINEC] )
     ) ? 1 : 0;
+}
+
+sub bounding_cube {
+    my ( $self ) = @_;
+    if ( !defined $self->[BCUBE] ) {
+        $self->[BCUBE] = ACME::Geo::3D::BoundingCube->new_from_3gon( $self );
+    }
+    return $self->[BCUBE];
 }
 
 1;

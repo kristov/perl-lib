@@ -7,16 +7,29 @@ use ACME::Geo::Point;
 use constant M_PI   => 3.14159265;
 use constant STARTP => 0;
 use constant ENDP   => 1;
+use constant NORMAL => 2;
 
 sub new {
-    my ( $class, $start, $end ) = @_;
-    my $self = [ $start, $end ];
+    my ( $class, $start, $end, $normal ) = @_;
+    my $self = [ $start, $end, $normal ];
     bless( $self, $class );
     return $self;
 }
 
+sub new_from_point_refs {
+    my ( $class, $start, $end, $normal ) = @_;
+    my $startp = ACME::Geo::Point->new( @{ $start } );
+    my $endp = ACME::Geo::Point->new( @{ $end } );
+    my $normalp;
+    if ( $normal ) {
+        $normalp = ACME::Geo::Point->new( @{ $normal } );
+    }
+    return $class->new( $startp, $endp, $normalp );
+}
+
 sub start { return $_[0]->[STARTP] }
 sub end { return $_[0]->[ENDP] }
+sub normal { return $_[0]->[NORMAL] }
 
 sub distance_to_point {
     my ( $self, $point ) = @_;
@@ -128,6 +141,13 @@ sub parallel {
     my $endn = $self->end->point_angle_distance_from( $tangent, $distance );
 
     return ACME::Geo::Line->new( $startn, $endn );
+}
+
+sub flip {
+    my ( $self ) = @_;
+    my $end = $self->[ENDP];
+    $self->[ENDP] = $self->[STARTP];
+    $self->[STARTP] = $end;
 }
 
 sub equal {

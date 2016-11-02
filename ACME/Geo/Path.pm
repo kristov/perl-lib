@@ -5,65 +5,8 @@ use warnings;
 
 sub new {
     my ( $class, @lines ) = @_;
-
-    my $self = [];
+    my $self = [ @lines ];
     bless( $self, $class );
-
-    if ( @lines ) {
-        my @stack;
-
-        my $seidx = 0;
-        my $stidx = 0;
-        my $maxstidx = 0;
-        my $woidx = 0;
-
-        my $linec = scalar( @lines );
-
-        $self->[$seidx] = $lines[$woidx];
-
-        for ( $woidx = 1; $woidx < $linec; $woidx++ ) {
-            if ( $self->[$seidx]->end->equal( $lines[$woidx]->start ) ) {
-                $seidx++;
-                $self->[$seidx] = $lines[$woidx];
-            }
-            else {
-                for ( $stidx = 0; $stidx < $maxstidx; $stidx++ ) {
-                    if ( defined $stack[$stidx] && $self->[$seidx]->end->equal( $stack[$stidx]->start ) ) {
-                        $seidx++;
-                        $self->[$seidx] = $stack[$stidx];
-                        $stack[$stidx] = undef;
-                    }
-                }
-                $stack[$maxstidx] = $lines[$woidx];
-                $maxstidx++;
-            }
-        }
-
-        if ( $maxstidx > 0 ) {
-            my $endchanged = 1;
-            my $whilecount = 0;
-
-            PASS: while ( $endchanged ) {
-                for ( $stidx = 0; $stidx < $maxstidx; $stidx++ ) {
-                    if ( defined $stack[$stidx] && $self->[$seidx]->end->equal( $stack[$stidx]->start ) ) {
-                        $seidx++;
-                        $self->[$seidx] = $stack[$stidx];
-                        $stack[$stidx] = undef;
-                        $endchanged = 1;
-                    }
-                    else {
-                        $endchanged = 0;
-                    }
-                }
-                $whilecount++;
-                if ( $whilecount > 1_000_000 ) {
-                    warn "gave up looking for points after too many loops";
-                    last PASS;
-                }
-            }
-        }
-    }
-
     return $self;
 }
 
