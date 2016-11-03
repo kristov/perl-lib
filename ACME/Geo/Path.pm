@@ -2,10 +2,45 @@ package ACME::Geo::Path;
 
 use strict;
 use warnings;
+use ACME::Geo::Line;
 
 sub new {
     my ( $class, @lines ) = @_;
-    my $self = [ @lines ];
+
+    my @new_lines;
+
+    if ( @lines ) {
+        my $last_line;
+        my $first_line;
+        LINE: for my $line ( @lines ) {
+            $first_line = $line if !defined $first_line;
+
+            if ( !defined $last_line ) {
+                $last_line = $line;
+                next LINE;
+            }
+
+
+            if ( $last_line->line_on_same_imaginary_line( $line ) ) {
+                my $new_line = ACME::Geo::Line->new( $last_line->start, $line->end, $last_line->normal );
+                $last_line = $new_line;
+            }
+            else {
+                push @new_lines, $last_line;
+                $last_line = $line;
+            }
+        }
+        if ( $last_line->line_on_same_imaginary_line( $first_line ) ) {
+            my $new_line = ACME::Geo::Line->new( $last_line->start, $first_line->end, $last_line->normal );
+            my $orig_first = shift @new_lines;
+            unshift @new_lines, $new_line;
+        }
+        else {
+            push @new_lines, $last_line;
+        }
+    }
+
+    my $self = [ @new_lines ];
     bless( $self, $class );
     return $self;
 }

@@ -14,6 +14,7 @@ use_ok( 'ACME::Geo::Path' );
 test_square_4_x_4();
 test_triangle();
 unclosed_poly();
+join_lines();
 
 done_testing();
 
@@ -111,4 +112,28 @@ sub unclosed_poly {
 
     my $p1 = ACME::Geo::Path->new( $l1, $l2, $l3 );
     is( $p1->closed, 0, 'closed(): it is NOT closed' );
+}
+
+sub join_lines {
+    diag( 'join_lines' );
+
+    my $l1 = ACME::Geo::Line->new_from_point_refs( [ 0,   0 ], [ 5,   0 ] );
+    my $l2 = ACME::Geo::Line->new_from_point_refs( [ 5,   0 ], [ 10,  0 ] );
+    my $l3 = ACME::Geo::Line->new_from_point_refs( [ 10,  0 ], [ 10,  5 ] );
+    my $l4 = ACME::Geo::Line->new_from_point_refs( [ 10,  5 ], [ 10, 10 ] );
+    my $l5 = ACME::Geo::Line->new_from_point_refs( [ 10, 10 ], [ 5,  10 ] );
+    my $l6 = ACME::Geo::Line->new_from_point_refs( [ 5,  10 ], [ 0,  10 ] );
+    my $l7 = ACME::Geo::Line->new_from_point_refs( [ 0,  10 ], [ 0,   5 ] );
+    my $l8 = ACME::Geo::Line->new_from_point_refs( [ 0,   5 ], [ 0,   0 ] );
+
+    my $p1 = ACME::Geo::Path->new( $l1, $l2, $l3, $l4, $l5, $l6, $l7, $l8 );
+
+    is_deeply( [ $p1->[0]->[0]->X, $p1->[0]->[0]->Y ], [ 0,   0 ], 'L1,P1 correct' );
+    is_deeply( [ $p1->[0]->[1]->X, $p1->[0]->[1]->Y ], [ 10,  0 ], 'L1,P2 correct' );
+    is_deeply( [ $p1->[1]->[0]->X, $p1->[1]->[0]->Y ], [ 10,  0 ], 'L2,P1 correct' );
+    is_deeply( [ $p1->[1]->[1]->X, $p1->[1]->[1]->Y ], [ 10, 10 ], 'L2,P2 correct' );
+    is_deeply( [ $p1->[2]->[0]->X, $p1->[2]->[0]->Y ], [ 10, 10 ], 'L3,P1 correct' );
+    is_deeply( [ $p1->[2]->[1]->X, $p1->[2]->[1]->Y ], [ 0,  10 ], 'L3,P2 correct' );
+    is_deeply( [ $p1->[3]->[0]->X, $p1->[3]->[0]->Y ], [ 0,  10 ], 'L4,P1 correct' );
+    is_deeply( [ $p1->[3]->[1]->X, $p1->[3]->[1]->Y ], [ 0,   0 ], 'L4,P2 correct' );
 }

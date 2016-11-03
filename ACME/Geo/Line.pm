@@ -8,6 +8,7 @@ use constant M_PI   => 3.14159265;
 use constant STARTP => 0;
 use constant ENDP   => 1;
 use constant NORMAL => 2;
+use constant FORM   => 3;
 
 sub new {
     my ( $class, $start, $end, $normal ) = @_;
@@ -141,6 +142,56 @@ sub parallel {
     my $endn = $self->end->point_angle_distance_from( $tangent, $distance );
 
     return ACME::Geo::Line->new( $startn, $endn );
+}
+
+sub line_on_same_imaginary_line {
+    my ( $self, $line ) = @_;
+
+    my $sf = $self->formula;
+    my $lf = $line->formula;
+
+    my $same_slope = 0;
+    if ( !defined $sf->[0] && !defined $lf->[0] ) {
+        $same_slope = 1;
+    }
+    elsif ( defined $sf->[0] && defined $lf->[0] && $sf->[0] == $lf->[0] ) {
+        $same_slope = 1;
+    }
+    my $same_offset = $sf->[1] == $lf->[1];
+
+    return ( $same_slope && $same_offset ) ? 1 : 0;
+}
+
+sub formula {
+    my ( $self ) = @_;
+    if ( !defined $self->[FORM] ) {
+        $self->[FORM] = $self->_generate_formula;
+    }
+    return $self->[FORM];
+}
+
+sub _generate_formula {
+    my ( $self ) = @_;
+
+    my $start = $self->[STARTP];
+    my $end = $self->[ENDP];
+
+    my $x1 = $start->X;
+    my $x2 = $end->X;
+    my $y1 = $start->Y;
+    my $y2 = $end->Y;
+
+    my $xd = $x2 - $x1;
+    my $yd = $y2 - $y1;
+
+    my $s = ( $xd == 0 ) ? undef : $yd / $xd;
+
+    my $o = ( $xd == 0 ) ? $x1 : ( $y2 - ( $s * $x2 ) );
+
+    my ( $xl, $xu ) = ( $x1 > $x2 ) ? ( $x2, $x1 ) : ( $x1, $x2 );
+    my ( $yl, $yu ) = ( $y1 > $y2 ) ? ( $y2, $y1 ) : ( $y1, $y2 );
+
+    return [ $s, $o, [ $xl, $xu ], [ $yl, $yu ] ];
 }
 
 sub flip {
