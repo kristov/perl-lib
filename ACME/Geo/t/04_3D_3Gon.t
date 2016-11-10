@@ -29,8 +29,8 @@ sub simple {
     my $i1 = $g1->line_zplane_intersection( 0 );
     my $i1p1 = $i1->start;
     my $i1p2 = $i1->end;
-    is_deeply( [ $i1p1->X, $i1p1->Y ], [ 1, 3 ], 'start point correct' );
-    is_deeply( [ $i1p2->X, $i1p2->Y ], [ 1, 1 ], 'end point correct' );
+    is_deeply( [ $i1p1->X + 0, $i1p1->Y + 0 ], [ 1, 3 ], 'start point correct' );
+    is_deeply( [ $i1p2->X + 0, $i1p2->Y + 0 ], [ 1, 1 ], 'end point correct' );
 }
 
 sub half_way_up {
@@ -43,8 +43,8 @@ sub half_way_up {
     my $i1 = $g1->line_zplane_intersection( 0.5 );
     my $i1p1 = $i1->start;
     my $i1p2 = $i1->end;
-    is_deeply( [ $i1p1->X, $i1p1->Y ], [ 1.5, 2.5 ], 'start point correct' );
-    is_deeply( [ $i1p2->X, $i1p2->Y ], [ 1.5, 1.5 ], 'end point correct' );
+    is_deeply( [ $i1p1->X + 0, $i1p1->Y + 0 ], [ 1.5, 2.5 ], 'start point correct' );
+    is_deeply( [ $i1p2->X + 0, $i1p2->Y + 0 ], [ 1.5, 1.5 ], 'end point correct' );
 }
 
 sub no_intersection {
@@ -79,8 +79,8 @@ sub vertical_triangle_base {
     my $i1 = $g1->line_zplane_intersection( 0 );
     my $i1p1 = $i1->start;
     my $i1p2 = $i1->end;
-    is_deeply( [ $i1p1->X, $i1p1->Y ], [ 1, 3 ], 'start point correct' );
-    is_deeply( [ $i1p2->X, $i1p2->Y ], [ 1, 1 ], 'end point correct' );
+    is_deeply( [ $i1p1->X + 0, $i1p1->Y + 0 ], [ 1, 3 ], 'start point correct' );
+    is_deeply( [ $i1p2->X + 0, $i1p2->Y + 0 ], [ 1, 1 ], 'end point correct' );
 }
 
 sub flat_triangle {
@@ -104,8 +104,8 @@ sub vertical_weird_triangle {
     my $i1 = $g1->line_zplane_intersection( 4 );
     my $i1p1 = $i1->start;
     my $i1p2 = $i1->end;
-    is_deeply( [ $i1p1->X, $i1p1->Y ], [ 0, 0 ], 'start point correct' );
-    is_deeply( [ $i1p2->X, $i1p2->Y ], [ 0, 6 ], 'end point correct' );
+    is_deeply( [ $i1p1->X + 0, $i1p1->Y + 0 ], [ 0, 0 ], 'start point correct' );
+    is_deeply( [ $i1p2->X + 0, $i1p2->Y + 0 ], [ 0, 6 ], 'end point correct' );
 }
 
 sub constructors {
