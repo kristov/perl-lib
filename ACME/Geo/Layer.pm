@@ -4,8 +4,6 @@ use strict;
 use warnings;
 use ACME::Geo::Path;
 
-use constant PATHS => 0;
-
 sub new {
     my ( $class, @paths ) = @_;
     my $self = [ @paths ];
@@ -90,6 +88,45 @@ sub new_from_unsorted_lines {
 sub nr_paths {
     my ( $self ) = @_;
     return scalar( @{ $self } );
+}
+
+sub bounding_box {
+    my ( $self ) = @_;
+
+    my $work_bbox;
+    for my $path ( @{ $self } ) {
+        my $bbox = $path->bounding_box;
+        $work_bbox = $bbox->union( $work_bbox );
+    }
+
+    return $work_bbox;
+}
+
+sub translate {
+    my ( $self, $byx, $byy ) = @_;
+
+    for my $path ( @{ $self } ) {
+        $path->translate( $byx, $byy );
+    }
+}
+
+sub equal {
+    my ( $self, $layer ) = @_;
+
+    my $equal_path_count = 0;
+
+    for my $path ( @{ $self } ) {
+        for my $other_path ( @{ $layer } ) {
+            if ( $other_path->equal( $path ) ) {
+                $equal_path_count++;
+            }
+        }
+    }
+
+    return (
+        $equal_path_count == scalar( @{ $self } ) &&
+        $equal_path_count == scalar( @{ $layer } )
+    ) ? 1 : 0;
 }
 
 1;

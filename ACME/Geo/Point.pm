@@ -8,7 +8,10 @@ use constant YI => 1;
 
 sub new {
     my ( $class, $X, $Y ) = @_;
-    my $self = [ $X, $Y ];
+    my $self = [
+        sprintf( '%0.4f', $X ),
+        sprintf( '%0.4f', $Y ),
+    ];
     bless( $self, $class );
     return $self;
 }
@@ -61,20 +64,18 @@ sub angle_between {
     return atan2( ( $point->[YI] - $self->[YI] ), ( $point->[XI] - $self->[XI] ) );
 }
 
+sub translate {
+    my ( $self, $byx, $byy ) = @_;
+    $self->[XI] = sprintf( '%0.4f', $self->[XI] + $byx );
+    $self->[YI] = sprintf( '%0.4f', $self->[YI] + $byy );
+}
+
 sub equal {
     my ( $self, $point ) = @_;
     return (
         $self->[XI] == $point->[XI] &&
         $self->[YI] == $point->[YI]
     ) ? 1 : 0;
-}
-
-sub translate {
-    my ( $self, $x, $y ) = @_;
-    my $xs = $self->[XI];
-    my $ys = $self->[YI];
-    $self->[XI] = $xs + $x;
-    $self->[YI] = $ys + $y;
 }
 
 1;

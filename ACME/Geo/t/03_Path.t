@@ -42,7 +42,7 @@ sub test_square_4_x_4 {
     is( $p1->closed, 1, 'closed(): it is closed' );
 
     diag( 'parallel_path(): testing parallel inner square' );
-    my $p3 = $p1->parallel_path( 1 );
+    my $p3 = $p1->parallel_path( 1, 1 );
     is_deeply( [ $p3->[0]->[0]->X + 0, $p3->[0]->[0]->Y + 0 ], [ 1, 1 ], 'L1,P1 correct' );
     is_deeply( [ $p3->[0]->[1]->X + 0, $p3->[0]->[1]->Y + 0 ], [ 3, 1 ], 'L1,P2 correct' );
     is_deeply( [ $p3->[1]->[0]->X + 0, $p3->[1]->[0]->Y + 0 ], [ 3, 1 ], 'L2,P1 correct' );
@@ -54,7 +54,7 @@ sub test_square_4_x_4 {
     diag( 'parallel_path(): done testing parallel inner square' );
 
     diag( 'parallel_path(): testing parallel outer cube' );
-    my $p4 = $p1->parallel_path( 0 );
+    my $p4 = $p1->parallel_path( 1, 0 );
     is_deeply( [ $p4->[0]->[0]->X + 0, $p4->[0]->[0]->Y + 0 ], [ -1, -1 ], 'L1,P1 correct' );
     is_deeply( [ $p4->[0]->[1]->X + 0, $p4->[0]->[1]->Y + 0 ], [  5, -1 ], 'L1,P2 correct' );
     is_deeply( [ $p4->[1]->[0]->X + 0, $p4->[1]->[0]->Y + 0 ], [  5, -1 ], 'L2,P1 correct' );
@@ -84,7 +84,7 @@ sub test_triangle {
     my $p1 = ACME::Geo::Path->new( $l1, $l2, $l3 );
     is( $p1->closed, 1, 'closed(): it is closed' );
 
-    my $p2 = $p1->parallel_path( 0 );
+    my $p2 = $p1->parallel_path( 1, 0 );
 
     diag( 'parallel_path(): testing parallel outer triangle' );
     is_deeply( [ $p2->[0]->[0]->X + 0 + 0, sprintf( '%0.2f', $p2->[0]->[0]->Y + 0 ) + 0 ], [  3,    -0.80 ], 'L1,P1 correct' );

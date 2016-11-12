@@ -3,12 +3,14 @@ package ACME::Geo::Line;
 use strict;
 use warnings;
 use ACME::Geo::Point;
+use ACME::Geo::BoundingBox;
 
 use constant M_PI   => 3.14159265;
 use constant STARTP => 0;
 use constant ENDP   => 1;
 use constant NORMAL => 2;
 use constant FORM   => 3;
+use constant BBOX   => 4;
 
 sub new {
     my ( $class, $start, $end, $normal ) = @_;
@@ -194,11 +196,19 @@ sub _generate_formula {
     return [ $s, $o, [ $xl, $xu ], [ $yl, $yu ] ];
 }
 
+sub translate {
+    my ( $self, $byx, $byy ) = @_;
+    $self->[STARTP]->translate( $byx, $byy );
+    $self->[ENDP]->translate( $byx, $byy );
+}
+
 sub flip {
     my ( $self ) = @_;
     my $end = $self->[ENDP];
     $self->[ENDP] = $self->[STARTP];
     $self->[STARTP] = $end;
+    $self->[FORM] = undef;
+    $self->[BBOX] = undef;
 }
 
 sub equal {
@@ -216,10 +226,22 @@ sub move_end {
     $self->[ENDP] = $point;
 }
 
-sub translate {
-    my ( $self, $x, $y ) = @_;
-    $self->[STARTP]->translate( $x, $y );
-    $self->[ENDP]->translate( $x, $y );
+sub length {
+    my ( $self ) = @_;
+    my $dx = $self->[ENDP]->X - $self->[STARTP]->X;
+    my $dy = $self->[ENDP]->Y - $self->[STARTP]->Y;
+    my $dxr2 = $dx * $dx;
+    my $dyr2 = $dy * $dy;
+    my $l = sqrt( $dxr2 + $dyr2 );
+    return sprintf( '%0.4f', $l );
+}
+
+sub bounding_box {
+    my ( $self ) = @_;
+    if ( !defined $self->[BBOX] ) {
+        $self->[BBOX] = ACME::Geo::BoundingBox->new_from_line( $self );
+    }
+    return $self->[BBOX];
 }
 
 1;
