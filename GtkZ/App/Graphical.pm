@@ -66,4 +66,10 @@ has 'da_height' => (
     required => 0,
 );
 
+sub invalidate_da {
+    my ( $self ) = @_;
+    my $update_rect = Gtk2::Gdk::Rectangle->new( 0, 0, $self->da_width, $self->da_height );
+    $self->da->window->invalidate_rect( $update_rect, FALSE );
+}
+
 __PACKAGE__->meta->make_immutable;
