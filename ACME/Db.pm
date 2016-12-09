@@ -6,6 +6,10 @@ use DBI;
 use Data::Dumper;
 use ACME::Config qw( conf );
 
+sub table { die "override table()" }
+sub columns { die "override columns()" }
+sub primary_key { die "override primary_key()" }
+
 sub dbh {
     my ( $class, $dbh ) = @_;
     return $class->_dbh();
