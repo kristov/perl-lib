@@ -2,6 +2,7 @@ package ACME::Geo::Point;
 
 use strict;
 use warnings;
+use ACME::Geo::Config qw( PT );
 
 use constant XI => 0;
 use constant YI => 1;
@@ -9,8 +10,8 @@ use constant YI => 1;
 sub new {
     my ( $class, $X, $Y ) = @_;
     my $self = [
-        sprintf( '%0.4f', $X ),
-        sprintf( '%0.4f', $Y ),
+        sprintf( PT(), $X ),
+        sprintf( PT(), $Y ),
     ];
     bless( $self, $class );
     return $self;
@@ -66,8 +67,8 @@ sub angle_between {
 
 sub translate {
     my ( $self, $byx, $byy ) = @_;
-    $self->[XI] = sprintf( '%0.4f', $self->[XI] + $byx );
-    $self->[YI] = sprintf( '%0.4f', $self->[YI] + $byy );
+    $self->[XI] = sprintf( PT(), $self->[XI] + $byx );
+    $self->[YI] = sprintf( PT(), $self->[YI] + $byy );
 }
 
 sub equal {

@@ -78,12 +78,6 @@ sub parallel_path {
         if ( $prev_parallel ) {
             my ( $point ) = $prev_parallel->intersect_imaginary_line( $parallel );
             if ( $point ) {
-                if ( $point->X > 2000 ) {
-                    printf( "[%0.4f,%0.4f],[%0.4f,%0.4f]\n", $prev_parallel->start->X, $prev_parallel->start->Y, $prev_parallel->end->X, $prev_parallel->end->Y );
-                    printf( "[%0.4f,%0.4f],[%0.4f,%0.4f]\n", $parallel->start->X, $parallel->start->Y, $parallel->end->X, $parallel->end->Y );
-                    printf( "[%0.4f,%0.4f],[%0.4f,%0.4f]\n", $prev_line->start->X, $prev_line->start->Y, $prev_line->end->X, $prev_line->end->Y );
-                    printf( "[%0.4f,%0.4f],[%0.4f,%0.4f]\n", $line->start->X, $line->start->Y, $line->end->X, $line->end->Y );
-                }
                 $prev_parallel->move_end( $point );
                 $parallel->move_start( $point );
             }
@@ -134,6 +128,14 @@ sub self_intersects {
             return 1 if $self->[$l1x]->interesct( $self->[$l2x] );
         }
     }
+}
+
+sub reverse {
+    my ( $self ) = @_;
+    my @lines = reverse( @{ $self } );
+    map { $_->flip } @lines;
+    $self = \@lines;
+    return $self;
 }
 
 sub equal {

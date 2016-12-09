@@ -2,6 +2,7 @@ package ACME::Geo::Line;
 
 use strict;
 use warnings;
+use ACME::Geo::Config qw( PT );
 use ACME::Geo::Point;
 use ACME::Geo::BoundingBox;
 
@@ -152,14 +153,20 @@ sub line_on_same_imaginary_line {
     my $sf = $self->formula;
     my $lf = $line->formula;
 
+    my $ss = ( defined $sf->[0] ) ? sprintf( '%0.1f', $sf->[0] ) : undef;
+    my $ls = ( defined $lf->[0] ) ? sprintf( '%0.1f', $lf->[0] ) : undef;
+
+    my $so = sprintf( '%0.1f', $sf->[1] );
+    my $lo = sprintf( '%0.1f', $lf->[1] );
+
     my $same_slope = 0;
-    if ( !defined $sf->[0] && !defined $lf->[0] ) {
+    if ( !defined $ss && !defined $ls ) {
         $same_slope = 1;
     }
-    elsif ( defined $sf->[0] && defined $lf->[0] && $sf->[0] == $lf->[0] ) {
+    elsif ( ( defined $ss && defined $ls ) && ( $ss == $ls ) ) {
         $same_slope = 1;
     }
-    my $same_offset = $sf->[1] == $lf->[1];
+    my $same_offset = $so == $lo;
 
     return ( $same_slope && $same_offset ) ? 1 : 0;
 }
@@ -186,9 +193,9 @@ sub _generate_formula {
     my $xd = $x2 - $x1;
     my $yd = $y2 - $y1;
 
-    my $s = ( $xd == 0 ) ? undef : $yd / $xd;
+    my $s = ( $xd == 0 ) ? undef : sprintf( PT(), $yd / $xd );
 
-    my $o = ( $xd == 0 ) ? $x1 : ( $y2 - ( $s * $x2 ) );
+    my $o = ( $xd == 0 ) ? $x1 : sprintf( PT(), ( $y2 - ( $s * $x2 ) ) );
 
     my ( $xl, $xu ) = ( $x1 > $x2 ) ? ( $x2, $x1 ) : ( $x1, $x2 );
     my ( $yl, $yu ) = ( $y1 > $y2 ) ? ( $y2, $y1 ) : ( $y1, $y2 );
@@ -233,7 +240,7 @@ sub length {
     my $dxr2 = $dx * $dx;
     my $dyr2 = $dy * $dy;
     my $l = sqrt( $dxr2 + $dyr2 );
-    return sprintf( '%0.4f', $l );
+    return sprintf( PT(), $l );
 }
 
 sub bounding_box {

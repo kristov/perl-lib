@@ -11,6 +11,7 @@ use ACME::Geo::Line;
 
 use_ok( 'ACME::Geo::Path' );
 
+test_reverse();
 test_square_4_x_4();
 test_triangle();
 unclosed_poly();
@@ -18,6 +19,34 @@ join_lines();
 two_path_union();
 
 done_testing();
+
+sub test_reverse {
+    diag( 'testing reverse' );
+
+    my $l1p1 = ACME::Geo::Point->new( 0, 0 );
+    my $l1p2 = ACME::Geo::Point->new( 4, 0 );
+    my $l1 = ACME::Geo::Line->new( $l1p1, $l1p2 );
+
+    my $l2p1 = ACME::Geo::Point->new( 4, 0 );
+    my $l2p2 = ACME::Geo::Point->new( 4, 4 );
+    my $l2 = ACME::Geo::Line->new( $l2p1, $l2p2 );
+
+    my $l3p1 = ACME::Geo::Point->new( 4, 4 );
+    my $l3p2 = ACME::Geo::Point->new( 0, 4 );
+    my $l3 = ACME::Geo::Line->new( $l3p1, $l3p2 );
+
+    my $l4p1 = ACME::Geo::Point->new( 0, 4 );
+    my $l4p2 = ACME::Geo::Point->new( 0, 0 );
+    my $l4 = ACME::Geo::Line->new( $l4p1, $l4p2 );
+
+    my $p1 = ACME::Geo::Path->new( $l1, $l2, $l3, $l4 );
+    $p1 = $p1->reverse;
+
+    is_deeply( [ $p1->[0]->[0]->X + 0, $p1->[0]->[0]->Y + 0 ], [ 0, 0 ], 'L1,P1 correct' );
+    is_deeply( [ $p1->[1]->[0]->X + 0, $p1->[1]->[0]->Y + 0 ], [ 0, 4 ], 'L2,P1 correct' );
+    is_deeply( [ $p1->[2]->[0]->X + 0, $p1->[2]->[0]->Y + 0 ], [ 4, 4 ], 'L3,P1 correct' );
+    is_deeply( [ $p1->[3]->[0]->X + 0, $p1->[3]->[0]->Y + 0 ], [ 4, 0 ], 'L4,P1 correct' );
+}
 
 sub test_square_4_x_4 {
     diag( 'testing square' );
