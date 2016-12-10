@@ -45,7 +45,7 @@ sub _build_da {
     $da->signal_connect( 'button-press-event' => sub { return $self->button_clicked( @_ ) } );
     $da->signal_connect( 'button-release-event' => sub { return $self->button_released( @_ ) } );
     $da->signal_connect( 'motion-notify-event' => sub { $self->motion_notify( @_ ) } );
-    $da->signal_connect( 'key-press-event' => sub { $self->keyhandler->handle( @_ ) } );
+    $da->signal_connect( 'key-press-event' => sub { $self->handle_keypress( @_ ) } );
     $da->signal_connect( 'scroll-event' => sub { $self->scroll( @_ ) } );
     $da->can_focus( TRUE );
     $da->grab_focus;
@@ -71,7 +71,7 @@ has 'da_height' => (
 sub invalidate_da {
     my ( $self ) = @_;
     my $update_rect = Gtk2::Gdk::Rectangle->new( 0, 0, $self->da_width, $self->da_height );
-    $self->da->window->invalidate_rect( $update_rect, FALSE );
+    return $self->da->window->invalidate_rect( $update_rect, FALSE );
 }
 
 sub scroll {

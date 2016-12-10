@@ -86,58 +86,43 @@ sub do_cairo_drawing {
 
 sub zoom_in {
     my ( $self, $event ) = @_;
-    $self->zoom( 1, $event );
+    return $self->zoom( 1, $event );
 }
 
 sub zoom_out {
     my ( $self, $event ) = @_;
-    $self->zoom( -1, $event );
+    return $self->zoom( -1, $event );
 }
 
 sub zoom {
     my ( $self, $scale_mod, $event ) = @_;
-    my $state = $self->zoom_state;
 
-    if ( $state->{view_off_new} ) {
-        for my $I ( 0, 1 ) {
-            #( $I == 0 ) && _debug( 'view_off X: %0.3f', $state->{view_off}->[$I] );
-            #( $I == 0 ) && _debug( 'view_off_new X: %0.3f', $state->{view_off_new}->[$I] );
-            $state->{view_off}->[$I] = $state->{view_off_new}->[$I];
-        }
-        delete $state->{view_off_new};
-    }
+    my $state = $self->zoom_state;
 
     $state->{zoom_point}->[0] = $event->x;
     $state->{zoom_point}->[1] = $event->y;
 
     my $scale = $state->{scale};
     $state->{scale} += $scale_mod;
-    _debug( $scale );
     if ( $state->{scale} < 1 ) {
         $state->{scale} = $scale;
         return;
     }
     $state->{prev_scale} = $scale;
 
-    my $offset = [];
-    my $view_off_new = [];
+    #my $scale_change = $state->{scale} - $state->{prev_scale};
+    my $scale_change = 1;
 
+    my $diff = [];
     for my $I ( 0, 1 ) {
-        #( $I == 0 ) && _debug( '( zoom_point: %0.1f / prev_scale: %0.1f ) + view_off: %0.1f', $state->{zoom_point}->[$I], $state->{prev_scale}, $state->{view_off}->[$I] );
-        my $z = ( $state->{zoom_point}->[$I] / $state->{prev_scale} ) + $state->{view_off}->[$I];
-        $offset->[$I] = 0 - $z;
-        #( $I == 0 ) && _debug( 'offset X: %0.1f', $offset->[$I] );
-        my $z_new = ( $state->{view_off}->[$I] + $offset->[$I] ) / $state->{scale};
-        $view_off_new->[$I] = $z_new;
-        #( $I == 0 ) && _debug( 'view_off_new X: %0.3f', $view_off_new->[$I] );
+        my $diff = $state->{zoom_point}->[$I] - $state->{view_off}->[$I];
+        my $diff_in_model_scale = $diff / $scale;
+        $state->{view_off}->[$I] = ( $scale_mod > 0 )
+            ? $state->{view_off}->[$I] - $diff_in_model_scale
+            : $state->{view_off}->[$I] + $diff_in_model_scale;
     }
 
-    for my $I ( 0, 1 ) {
-        $state->{view_off_new}->[$I] = $view_off_new->[$I];
-    }
-    $state->{offset} = $offset;
-
-    $self->invalidate_da;
+    return $self->invalidate_da;
 }
 
 sub translate {
@@ -147,9 +132,7 @@ sub translate {
     my $trans_point = [];
 
     for my $I ( 0, 1 ) {
-        my $diff = $state->{offset}->[$I] + $point->[$I];
-        my $scaled = $diff * $state->{scale};
-        $trans_point->[$I] = $state->{zoom_point}->[$I] + $scaled;
+        $trans_point->[$I] = ( $point->[$I] * $state->{scale} ) + $state->{view_off}->[$I];
     }
 
     return $trans_point;
@@ -177,11 +160,11 @@ sub button_released {
         my $diff = [];
         for my $I ( 0, 1 ) {
             $diff->[$I] = $mouse->[$I] - $state->{mouse_pos}->[$I];
-            $state->{view_off_new}->[$I] += $diff->[$I];
-            ( $I == 0 ) && _debug( 'view_off X: %0.3f, diff: %0.3f', $state->{view_off_new}->[$I], $diff->[$I] );
+            $state->{view_off_new}->[$I] -= $diff->[$I];
         }
         $self->invalidate_da;
     }
+    return TRUE;
 }
 
 sub motion_notify {
@@ -200,10 +183,10 @@ sub scroll {
 
     my $direction = $event->direction;
     if ( $direction eq 'up' ) {
-        $self->zoom_in( $event );
+        return $self->zoom_in( $event );
     }
     else {
-        $self->zoom_out( $event );
+        return $self->zoom_out( $event );
     }
 }
 
