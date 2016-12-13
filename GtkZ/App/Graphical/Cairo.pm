@@ -160,22 +160,15 @@ sub button_released {
         my $diff = [];
         for my $I ( 0, 1 ) {
             $diff->[$I] = $mouse->[$I] - $state->{mouse_pos}->[$I];
-            $state->{view_off_new}->[$I] -= $diff->[$I];
+            $state->{view_off}->[$I] += $diff->[$I];
         }
-        $self->invalidate_da;
+        return $self->invalidate_da;
     }
     return TRUE;
 }
 
 sub motion_notify {
     my ( $self, $da, $event ) = @_;
-    my $state = $self->zoom_state;
-    if ( $state->{button_on} ) {
-        my $mouse = [ $event->x, $event->y ];
-        for my $I ( 0, 1 ) {
-            
-        }
-    }
 }
 
 sub scroll {
