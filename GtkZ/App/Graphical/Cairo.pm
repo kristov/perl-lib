@@ -37,11 +37,13 @@ has 'zoom_state' => (
     isa => 'HashRef',
     default => sub {
         return {
-            view_off    => [ 0, 0 ],
-            zoom_point  => [ 0, 0 ],
-            offset      => [ 0, 0 ],
-            scale       => 1,
-            prev_scale  => undef,
+            view_off => [ 0, 0 ],
+            offset => [ 0, 0 ],
+            rel_mouse_pos => [ 0, 0 ],
+            click_mouse_pos => [ 0, 0 ],
+            scr_mouse_pos => [ 0, 0 ],
+            scale => 1,
+            prev_scale => undef,
         };
     },
     documentation => 'State of zooming',
@@ -99,8 +101,8 @@ sub zoom {
 
     my $state = $self->zoom_state;
 
-    $state->{zoom_point}->[0] = $event->x;
-    $state->{zoom_point}->[1] = $event->y;
+    $state->{scr_mouse_pos}->[0] = $event->x;
+    $state->{scr_mouse_pos}->[1] = $event->y;
 
     my $scale = $state->{scale};
     $state->{scale} += $scale_mod;
@@ -110,16 +112,15 @@ sub zoom {
     }
     $state->{prev_scale} = $scale;
 
-    #my $scale_change = $state->{scale} - $state->{prev_scale};
-    my $scale_change = 1;
-
     my $diff = [];
     for my $I ( 0, 1 ) {
-        my $diff = $state->{zoom_point}->[$I] - $state->{view_off}->[$I];
+        my $diff = $state->{scr_mouse_pos}->[$I] - $state->{view_off}->[$I];
         my $diff_in_model_scale = $diff / $scale;
         $state->{view_off}->[$I] = ( $scale_mod > 0 )
             ? $state->{view_off}->[$I] - $diff_in_model_scale
             : $state->{view_off}->[$I] + $diff_in_model_scale;
+
+        $state->{rel_mouse_pos}->[$I] = ( $state->{scr_mouse_pos}->[$I] - $state->{view_off}->[$I] ) / $state->{scale};
     }
 
     return $self->invalidate_da;
@@ -146,20 +147,40 @@ sub _debug {
 
 sub button_clicked {
     my ( $self, $da, $event ) = @_;
+    $self->_usr_handle_button( $event );
     my $state = $self->zoom_state;
     $state->{button_on} = 1;
-    $state->{mouse_pos} = [ $event->x, $event->y ];
+    $state->{click_mouse_pos} = [ $event->x, $event->y ];
 }
+
+sub _usr_handle_button {
+    my ( $self, $event ) = @_;
+    my $button_nr = $event->button;
+    if ( $button_nr == 1 ) {
+        $self->left_click;
+    }
+    elsif ( $button_nr == 2 ) {
+        $self->right_click;
+    }
+    elsif ( $button_nr == 3 ) {
+        $self->middle_click;
+    }
+}
+
+sub left_click {}
+sub right_click {}
+sub middle_click {}
 
 sub button_released {
     my ( $self, $da, $event ) = @_;
+    $self->_calculate_mouse_positions( $event );
     my $state = $self->zoom_state;
     if ( $state->{button_on} ) {
         $state->{button_on} = 0;
         my $mouse = [ $event->x, $event->y ];
         my $diff = [];
         for my $I ( 0, 1 ) {
-            $diff->[$I] = $mouse->[$I] - $state->{mouse_pos}->[$I];
+            $diff->[$I] = $mouse->[$I] - $state->{click_mouse_pos}->[$I];
             $state->{view_off}->[$I] += $diff->[$I];
         }
         return $self->invalidate_da;
@@ -167,8 +188,37 @@ sub button_released {
     return TRUE;
 }
 
+sub _calculate_mouse_positions {
+    my ( $self, $event ) = @_;
+
+    my $state = $self->zoom_state;
+    $state->{scr_mouse_pos}->[0] = $event->x;
+    $state->{scr_mouse_pos}->[1] = $event->y;
+
+    for my $I ( 0, 1 ) {
+        $state->{rel_mouse_pos}->[$I] = ( $state->{scr_mouse_pos}->[$I] - $state->{view_off}->[$I] ) / $state->{scale};
+    }
+}
+
 sub motion_notify {
     my ( $self, $da, $event ) = @_;
+    $self->_calculate_mouse_positions( $event );
+    my $state = $self->zoom_state;
+    $self->mouse_moved( $state->{rel_mouse_pos}->[0], $state->{rel_mouse_pos}->[1] );
+}
+
+sub mouse_moved {}
+
+sub rel_mouse_x {
+    my ( $self ) = @_;
+    my $state = $self->zoom_state;
+    return $state->{rel_mouse_pos}->[0];
+}
+
+sub rel_mouse_y {
+    my ( $self ) = @_;
+    my $state = $self->zoom_state;
+    return $state->{rel_mouse_pos}->[1];
 }
 
 sub scroll {
