@@ -24,6 +24,13 @@ has 'height' => (
     default => 600,
 );
 
+has 'menu_def' => (
+    is  => 'rw',
+    isa => 'ArrayRef',
+    required => 1,
+    documentation => 'The menu definition',
+);
+
 has 'menu' => (
     is => 'rw',
     isa => 'GtkZ::Menu',
@@ -33,7 +40,10 @@ has 'menu' => (
 
 sub _build_menu {
     my ( $self ) = @_;
-    return GtkZ::Menu->new( { app => $self->app } );
+    return GtkZ::Menu->new( {
+        app      => $self->app,
+        menu_def => $self->menu_def,
+    } );
 }
 
 has 'window' => (

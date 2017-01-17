@@ -20,34 +20,7 @@ has 'widget' => (
 has 'menu_def' => (
     is  => 'rw',
     isa => 'ArrayRef',
-    default => sub {
-        return [
-            {
-                label => '_File',
-                items => [
-                    {
-                        label => '_Quit',
-                        call  => sub {
-                            my ( $self ) = @_;
-                            $self->app->quit;
-                        },
-                    }
-                ],
-            },
-            {
-                label => '_About',
-                items => [
-                    {
-                        label => '_Help',
-                        call  => sub {
-                            my ( $self ) = @_;
-                            print "Help me!!\n";
-                        },
-                    },
-                ],
-            },
-        ];
-    },
+    required => 1,
     documentation => 'The menu definition',
 );
 
@@ -63,7 +36,7 @@ sub _build_widget {
 
         for my $item ( @{ $menu_def->{items} } ) {
             my $menu_item = Gtk2::MenuItem->new( $item->{label} );
-            $menu_item->signal_connect( 'activate' => sub { $item->{call}->( $self ) } );
+            $menu_item->signal_connect( 'activate' => sub { $item->{call}->( $self->app ) } );
             $menu->append( $menu_item );
         }
 
