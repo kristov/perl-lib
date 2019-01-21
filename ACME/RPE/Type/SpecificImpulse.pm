@@ -2,7 +2,7 @@ package ACME::RPE::Type::SpecificImpulse;
 
 use Moose;
 
-has 'seconds' => (
+has 's' => (
     is => 'ro',
     isa => 'Num',
     required => 1,

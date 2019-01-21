@@ -4,10 +4,18 @@ use Test::More;
 
 use_ok('ACME::RPE::Definitions');
 
-ACME::RPE::Definitions::rocket_mass_ratio({
-    initial_mass => ACME::RPE::Type::Mass->new({kilograms => 200}),
-    final_mass => ACME::RPE::Type::Mass->new({kilograms => 130}),
-    operating_duration => ACME::RPE::Type::Time->new({seconds => 3}),
-});
+sub test_specific_impulse {
+    my $mass_flow = ACME::RPE::Type::MassFlow->new({kg_s => 23.3});
+    my $force = ACME::RPE::Type::Force->new({N => 54_857});
+
+    my $Is = ACME::RPE::Definitions::specific_impulse_mass_flow_force({
+        mass_flow => $mass_flow,
+        force => $force,
+    });
+
+    is(sprintf("%0.3f", $Is->s), 240.081, 'specific impulse correct');
+}
+
+test_specific_impulse();
 
 done_testing();
