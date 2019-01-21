@@ -2,32 +2,32 @@ package ACME::RPE::Type::Force;
 
 use Moose;
 
-use constant NEWTON_TO_POUNDFORCE => 0.224809;
+use constant N_TO_LBF => 0.224809;
 
-has 'newtons' => (
+has 'N' => (
     is => 'ro',
     isa => 'Num',
     required => 0,
     lazy => 1,
-    builder => '_build_newtons',
+    builder => '_build_N',
 );
 
-sub _build_newtons {
+sub _build_N {
     my ($self) = @_;
-    return $self->pound_force / NEWTON_TO_POUNDFORCE;
+    return $self->lbf / N_TO_LBF;
 }
 
-has 'pound_force' => (
+has 'lbf' => (
     is => 'ro',
     isa => 'Num',
     required => 0,
     lazy => 1,
-    builder => '_build_pound_force',
+    builder => '_build_lbf',
 );
 
-sub _build_pound_force {
+sub _build_lbf {
     my ($self) = @_;
-    return $self->newtons * NEWTON_TO_POUNDFORCE;
+    return $self->N * N_TO_LBF;
 }
 
 __PACKAGE__->meta->make_immutable;
