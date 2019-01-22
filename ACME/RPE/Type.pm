@@ -10,5 +10,6 @@ use ACME::RPE::Type::Acceleration;
 use ACME::RPE::Type::MassFlow;
 use ACME::RPE::Type::Impulse;
 use ACME::RPE::Type::SpecificImpulse;
+use ACME::RPE::Type::Velocity;
 
 1;
